@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Scholarship Chatbot</title>
+</head>
+<body>
+    <h1>University of Taxila Scholarship Chatbot</h1>
+    <div id="chatbox">
+        <input type="text" id="question" placeholder="Ask a question...">
+        <button onclick="askQuestion()">Ask</button>
+    </div>
+    <div id="response"></div>
+
+    <script>
+        async function askQuestion() {
+            const question = document.getElementById('question').value;
+            const responseDiv = document.getElementById('response');
+            const response = await fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ question: question })
+            });
+            const data = await response.json();
+            responseDiv.innerHTML = `<p>${data.answer}</p>`;
+        }
+    </script>
+</body>
+</html>

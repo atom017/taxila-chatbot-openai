@@ -1,0 +1,13 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+#chatbox {
+    margin-bottom: 20px;
+}
+
+#response {
+    margin-top: 20px;
+    font-weight: bold;
+}
