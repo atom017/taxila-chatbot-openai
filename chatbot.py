@@ -1,13 +1,20 @@
 import json
-from langchain import OpenAI, ConversationChain
-from langchain.prompts import PromptTemplate
 import os
+import requests
+from bs4 import BeautifulSoup
+from langchain_community.llms import OpenAI  # For LLM
+from langchain_openai import ChatOpenAI  # Use ChatOpenAI
+from langchain.prompts import PromptTemplate
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Load OpenAI API key
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
-# Initialize OpenAI with your API key
-llm = OpenAI(temperature=0.7)
+# Initialize ChatOpenAI with your API key
+llm = ChatOpenAI(temperature=0.7, openai_api_key=openai_api_key)
 
 # Create a prompt template
 prompt_template = PromptTemplate(
@@ -15,13 +22,41 @@ prompt_template = PromptTemplate(
     template="You are a helpful assistant for the University of Taxila's scholarship program. Answer the question based on the available scholarships data: {question} \nScholarships data: {scholarships}"
 )
 
-# Create a conversation chain
-conversation = ConversationChain(llm=llm, prompt=prompt_template)
+# Function to scrape scholarship data from the website
+def scrape_scholarships():
+    url = "https://scholarshipscorner.website/scholarships/"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-# Load scholarships data
-with open('data/scholarships.json') as f:
-    scholarships = json.load(f)
+    scholarships = []
+
+    # Find all scholarship articles
+    articles = soup.find_all('article')
+    for article in articles:
+        title_tag = article.find('h2', class_='entry-title')
+        title = title_tag.get_text()
+        link = title_tag.find('a')['href']
+        published_date = article.find('span', class_='published').get_text()
+
+        # Append the scholarship details to the list
+        scholarships.append({
+            'title': title,
+            'link': link,
+            'published_date': published_date
+        })
+
+    return scholarships
+
+# Load scholarships data by scraping
+scholarships = scrape_scholarships()
 
 def answer_question(question):
-    response = conversation.predict(question=question, scholarships=scholarships)
-    return response
+    formatted_scholarships = json.dumps(scholarships, indent=2)  # Format for better readability
+    response = llm.generate([prompt_template.format(question=question, scholarships=formatted_scholarships)])
+    return response.generations[0][0].text.strip()
+
+# Example usage
+if __name__ == "__main__":
+    question = "What scholarships are available for international students?"
+    answer = answer_question(question)
+    print(answer)
