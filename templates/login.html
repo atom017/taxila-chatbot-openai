@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        :root {
+            --navbar-background: #191314;
+            --secondary-background: #292425;
+            --bg-50: #3E393A;
+            --navbar-text-color: #FFFFFF;
+            --button-background: #E74C3C;
+            --button-hover-background: #C0392B;
+            --input-border-color: #BDC3C7;
+            --input-background: #ECF0F1;
+            --input-text-color: #333333;
+            --container-background: #FFFFFF;
+            --container-shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: var(--secondary-background);
+        }
+
+        /* Navbar styling */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--navbar-background);
+            padding: 15px 20px;
+            color: var(--navbar-text-color);
+            box-shadow: 0 2px 4px var(--container-shadow);
+        }
+
+        .navbar .left {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .navbar .logo-img {
+            width: 50px;
+            height: 50px;
+        }
+
+        /* Center the container */
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: var(--bg-50);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px var(--container-shadow);
+        }
+
+        h1 {
+            text-align: center;
+            color: #FCFAFA;
+            font-weight: 400;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #FCFAFA;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 4px;
+            background-color: var(--input-background);
+            color: var(--input-text-color);
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--button-background);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--button-hover-background);
+        }
+
+        /* Mobile-friendly adjustments */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="left">Taxila</div>
+        <img src="/taxila.png" class="logo-img" alt="image">
+    </div>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <h1>Login</h1>
+        <form action="{{ url_for('login') }}" method="POST">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="submit">Login</button>
+        </form>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li style="color: red;">{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+    </div>
+</body>
+
+</html>
