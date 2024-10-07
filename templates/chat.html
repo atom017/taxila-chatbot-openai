@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxila Chatbot</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #292425;
+        }
+
+        /* Navbar styling */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #191314;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .navbar .left {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .navbar .logout-btn {
+            background-color: #D1171A; /* Logout button color */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .navbar .logout-btn:hover {
+            background-color: #C0392B;
+        }
+
+        /* Chat container */
+        .container {
+            max-width: 600px;
+            margin: 10px auto;
+            padding: 10px;
+        }
+
+        .chat-box {
+            border: 1px solid #3E393A;
+            padding: 10px;
+            height: 70vh;
+            margin: auto;
+            overflow-y: scroll;
+            background-color: #3E393A;
+        }
+
+        .message {
+            margin: 10px 0;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .message.user {
+            text-align: right;
+            background-color: #E74C3C; /* User message color */
+            color: white;
+        }
+
+        .message.model {
+            text-align: left;
+            background-color: #4CAF50; /* Model response color */
+            color: white;
+        }
+
+        /* Form styling */
+        form {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        form input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #EAE2E2;
+            border-right: none;
+            border-radius: 5px 0 0 5px;
+            background-color: #3E393A;
+            color: white;
+        }
+
+        form button {
+            background-color: #D1171A; /* Send button color */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #C0392B;
+        }
+
+        .text-white {
+            color: #EAE2E2;
+        }
+
+        .date-text {
+            font-size: small;
+            text-align: center;
+            color: #EAE2E2;
+        }
+    </style>
+</head>
+<body>
+    {% if 'username' in session %}
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="left text-white">Taxila</div>
+        <a href="/auth/logout" class="logout-btn">Logout</a>
+    </div>
+
+    <!-- Chat Container -->
+    <div class="container">
+        <div id="chat-box" class="chat-box"></div>
+        <form id="chat-form">
+            <input type="text" id="message" placeholder="Type your message here" required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        // Function to display date and time
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            const date = now.toLocaleDateString();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = `<div class="text-sm mb-4 date-text">${date} ${time}</div>`;
+        });
+
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const messageInput = document.getElementById('message');
+            const messageText = messageInput.value;
+            messageInput.value = '';
+
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<div class="message user">${messageText}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: messageText })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok.');
+                }
+
+                const data = await response.json();
+                chatBox.innerHTML += `<div class="message model">${data.answer}</div>`;
+            } catch (error) {
+                chatBox.innerHTML += `<div class="message model">Error: Could not send message</div>`;
+                console.error('Fetch error:', error);
+            }
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+    </script>
+    {% else %}
+    <script>
+        window.location.href = "{{ url_for('login') }}";
+    </script>
+    {% endif %}
+</body>
+</html>
