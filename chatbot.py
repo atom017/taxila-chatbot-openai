@@ -10,16 +10,16 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-# Load OpenAI API key
+
 openai_api_key = os.getenv('OPENAI_API_KEY')
 
-# Initialize ChatOpenAI with your API key
+
 llm = ChatOpenAI(temperature=0.7, openai_api_key=openai_api_key)
 
-# Create a prompt template
+#  prompt template
 prompt_template = PromptTemplate(
     input_variables=["question", "scholarships"],
-    template="You are a helpful assistant for the University of Taxila's scholarship program. Answer the question based on the available scholarships data: {question} \nScholarships data: {scholarships}"
+    template="You are a helpful assistant for the University of Taxila. You help users by giving scholarship information from Scholarship Corner. Answer the question based on the available scholarships data: {question} \nScholarships data: {scholarships}"
 )
 
 # Function to scrape scholarship data from the website
@@ -51,7 +51,7 @@ def scrape_scholarships():
 scholarships = scrape_scholarships()
 
 def answer_question(question):
-    formatted_scholarships = json.dumps(scholarships, indent=2)  # Format for better readability
+    formatted_scholarships = json.dumps(scholarships, indent=2)  
     response = llm.generate([prompt_template.format(question=question, scholarships=formatted_scholarships)])
     return response.generations[0][0].text.strip()
 
