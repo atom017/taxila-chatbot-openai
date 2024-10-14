@@ -1,8 +1,0 @@
-flask
-openai
-langchain
-langchain_community
-langchain_openai
-requests
-beautifulsoup4
-python-dotenv
