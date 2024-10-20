@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
-from chatbot import answer_question  
+from chatbot2 import answer_question  
 app = Flask(__name__)
 app.secret_key = 'secret_key'  
 
