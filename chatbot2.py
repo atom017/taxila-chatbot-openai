@@ -10,7 +10,7 @@ load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 # Initialize ChatOpenAI with your API key
-llm = ChatOpenAI(temperature=0.7, openai_api_key=openai_api_key, model="gpt-4")
+llm = ChatOpenAI(temperature=0.7, openai_api_key=openai_api_key)
 
 # Create a prompt template
 prompt_template = PromptTemplate(
