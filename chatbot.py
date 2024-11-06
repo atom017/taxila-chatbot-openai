@@ -1,62 +1,37 @@
-import json
 import os
-import requests
-from bs4 import BeautifulSoup
-from langchain_community.llms import OpenAI  # For LLM
-from langchain_openai import ChatOpenAI  # Use ChatOpenAI
-from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
+import anthropic
+from langchain.prompts import PromptTemplate
 
 # Load environment variables from .env file
 load_dotenv()
 
+# Load Anthropic API key from environment variable
+anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
 
-openai_api_key = os.getenv('OPENAI_API_KEY')
+# Initialize the Anthropic client
+client = anthropic.Anthropic(api_key=anthropic_api_key)
 
-
-llm = ChatOpenAI(temperature=0.7, openai_api_key=openai_api_key)
-
-#  prompt template
+# Create a prompt template for the chatbot
 prompt_template = PromptTemplate(
-    input_variables=["question", "scholarships"],
-    template="You are a helpful assistant for the University of Taxila. You help users by giving scholarship information from Scholarship Corner. Answer the question based on the available scholarships data: {question} \nScholarships data: {scholarships}"
+    input_variables=["question"],
+    template="You are a helpful assistant. Answer the question as best as you can: {question}",
 )
 
-# Function to scrape scholarship data from the website
-def scrape_scholarships():
-    url = "https://scholarshipscorner.website/scholarships/"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-
-    scholarships = []
-
-    # Find all scholarship articles
-    articles = soup.find_all('article')
-    for article in articles:
-        title_tag = article.find('h2', class_='entry-title')
-        title = title_tag.get_text()
-        link = title_tag.find('a')['href']
-        published_date = article.find('span', class_='published').get_text()
-
-        # Append the scholarship details to the list
-        scholarships.append({
-            'title': title,
-            'link': link,
-            'published_date': published_date
-        })
-
-    return scholarships
-
-# Load scholarships data by scraping
-scholarships = scrape_scholarships()
 
 def answer_question(question):
-    formatted_scholarships = json.dumps(scholarships, indent=2)  
-    response = llm.generate([prompt_template.format(question=question, scholarships=formatted_scholarships)])
-    return response.generations[0][0].text.strip()
+    prompt = prompt_template.format(question=question)
 
-# Example usage
+    # Send a message to the Claude model via the Anthropic client
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",  # You can replace this with the correct model if necessary
+        max_tokens=100,
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response["completion"].strip()
+
+
+# Example usage for testing (can be removed later)
 if __name__ == "__main__":
-    question = "What scholarships are available for international students?"
-    answer = answer_question(question)
-    print(answer)
+    question = "What is the capital of France?"
+    print(answer_question(question))
